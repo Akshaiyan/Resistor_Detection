@@ -139,6 +139,8 @@ from webcolors import rgb_to_name
 
 cnts = contours
 all_of_em = []
+all_of_em_2 = []
+all_of_em_3 = []
 import time
 for cnt in cnts:
 
@@ -147,8 +149,10 @@ for cnt in cnts:
         cv2.rectangle(cropped,(x,y),(x+w,y+h),(0,255,0),2)
 
         all_of_em.append(cropped[y:y+h,x:x+w])
-
-
+        all_of_em_2.append([x+w,x,y])
+        all_of_em_3.append([cropped[y:y+h,x:x+w],x,y])
+all_of_em_2.sort()
+print(all_of_em_2[-1])
 import pandas as pd
 
 #Training Data
@@ -183,27 +187,39 @@ def rgb_to_hex(r, g, b):
 
 print(rgb_to_hex(255, 165, 1))
 #https://gist.githubusercontent.com/lunohodov/1995178/raw/80b1f09dd2a746db465be090a4f9893830153064/ral_standard.csv
+e = 0
+for band in all_of_em:
+    xee, yee, _ = cropped.shape
+    print(all_of_em_2[-1][1],all_of_em_3[e][1])
+    if all_of_em_2[-1][1] == all_of_em_3[e][1]:
 
+    e += 1
 bands = []
+e = 0
 for band in all_of_em:
     xe,ye,_ = band.shape
+    print(all_of_em_2[-1][1],all_of_em_3[e][1])
+    if all_of_em_2[-1][1] == all_of_em_3[e][1]:
+        print("good lordeth")
+
     center_x,center_y = ((xe - 1) //2), ((ye-1)//2)
     color = band[center_x,center_y]
     R,G,B = color[2],color[1],color[0]
     requested_colour = (R, G, B)
     actual_name, closest_name = get_colour_name(requested_colour)
     for color in colors:
-        print(color)
+        #print(color)
         for element in color:
-            print(element)
+           # print(element)
             if closest_name == element.lower():
                 bands.append(color[0])
             else:
                 pass
-    print(closest_name)
+    e += 1
+   # print(closest_name)
     #print(rgb_to_name((R,G,B), spec='css3'))
-    print(rgb_to_hex(R,G,B))
-print(bands)
+   # print(rgb_to_hex(R,G,B))
+#print(bands)
 #cv2.imshow('e', all_of_em[2])
 #cv2.imshow('ee', all_of_em[3])
 #cv2.imshow('eee', all_of_em[4])
