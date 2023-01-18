@@ -129,7 +129,7 @@ for i in range(len(x)):
 
 
 contours, hierarchy = cv2.findContours(the_better_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[-2:]
-#elele = cv2.drawContours(cropped, contours, -1, (0, 255, 0), 3)
+elele = cv2.drawContours(cropped, contours, -1, (0, 255, 0), 3)
 R = []
 G = []
 B = []
@@ -145,14 +145,37 @@ import time
 for cnt in cnts:
 
         x,y,w,h = cv2.boundingRect(cnt) # offsets - with this you get 'mask'
-        print(w,h)
+        print(x,y,w,h)
         cv2.rectangle(cropped,(x,y),(x+w,y+h),(0,255,0),2)
 
-        all_of_em.append(cropped[y:y+h,x:x+w])
-        all_of_em_2.append([x+w,x,y])
-        all_of_em_3.append([cropped[y:y+h,x:x+w],x,y])
-all_of_em_2.sort()
-print(all_of_em_2[-1])
+
+
+        if w < 20:
+            print("e")
+        else:
+            all_of_em_2.append(x)
+            all_of_em.append(cropped[y:y + h, x:x + w])
+            all_of_em_3.append(cropped[y:y + h, x:x + w])
+
+
+
+
+
+fr = 0
+hist_ind = []
+hist_fr = []
+for i in range(10,cropped.shape[1]):
+    #print(i)
+    try:
+
+        ind = all_of_em_2.index(i)
+        print(fr,ind)
+        geez = all_of_em_3[ind]
+        all_of_em[fr] = geez
+        fr += 1
+
+    except:
+        pass
 import pandas as pd
 
 #Training Data
@@ -177,6 +200,24 @@ def get_colour_name(requested_colour):
         actual_name = None
     return actual_name, closest_name
 
+def calculate_value(resistor):
+    vals = [['Black',0,0,0,1,0],['Brown',1,1,1,10,1],['Orange',3,3,3,1000,0]]
+    value = [0,0,0,0,0]
+    val_return = 0
+    for band in resistor:
+
+        for col in vals:
+            if band.lower == col[0].lower:
+                place = resistor.index(band)
+                value[place] = col[place + 1]
+                print(col[place + 1])
+
+    dig_one = value[0] * 100 + value[1] * 10 + value[2]
+    print(value)
+    val_return = dig_one
+    return val_return
+
+
 
 colors = [["Orange","Peru"],["Brown","Maroon","Saddlebrown"],["Black"]]
 
@@ -188,39 +229,38 @@ def rgb_to_hex(r, g, b):
 print(rgb_to_hex(255, 165, 1))
 #https://gist.githubusercontent.com/lunohodov/1995178/raw/80b1f09dd2a746db465be090a4f9893830153064/ral_standard.csv
 e = 0
-for band in all_of_em:
-    xee, yee, _ = cropped.shape
-    print(all_of_em_2[-1][1],all_of_em_3[e][1])
-    if all_of_em_2[-1][1] == all_of_em_3[e][1]:
 
-    e += 1
 bands = []
-e = 0
-for band in all_of_em:
-    xe,ye,_ = band.shape
-    print(all_of_em_2[-1][1],all_of_em_3[e][1])
-    if all_of_em_2[-1][1] == all_of_em_3[e][1]:
-        print("good lordeth")
 
-    center_x,center_y = ((xe - 1) //2), ((ye-1)//2)
-    color = band[center_x,center_y]
-    R,G,B = color[2],color[1],color[0]
-    requested_colour = (R, G, B)
-    actual_name, closest_name = get_colour_name(requested_colour)
-    for color in colors:
-        #print(color)
-        for element in color:
-           # print(element)
-            if closest_name == element.lower():
-                bands.append(color[0])
-            else:
-                pass
-    e += 1
-   # print(closest_name)
+for band in all_of_em:
+    try:
+        xe,ye,_ = band.shape
+
+
+        center_x,center_y = ((xe - 1) //2), ((ye-1)//2)
+        color = band[center_x,center_y]
+        R,G,B = color[2],color[1],color[0]
+        requested_colour = (R, G, B)
+        actual_name, closest_name = get_colour_name(requested_colour)
+        print(closest_name,xe,ye)
+        for color in colors:
+            for element in color:
+                print(element)
+                if element.lower() == closest_name:
+                    bands.append(color[0])
+
+    except Exception as e:
+        print("9ur9sugf")
+        print(e)
+
     #print(rgb_to_name((R,G,B), spec='css3'))
-   # print(rgb_to_hex(R,G,B))
-#print(bands)
-#cv2.imshow('e', all_of_em[2])
+
+print(bands)
+bands.reverse()
+print("The Value of the Resistor is",calculate_value(bands),"Ohms")
+cv2.imshow('Conts', elele)
+cv2.imshow('HSV', img2)
+
 #cv2.imshow('ee', all_of_em[3])
 #cv2.imshow('eee', all_of_em[4])
 #cv2.imshow('eeee', all_of_em[5])
