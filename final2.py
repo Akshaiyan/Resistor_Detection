@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from collections import *
-img1 = cv2.imread('resisgeez.jpg', cv2.COLOR_BGR2HSV)
+img1 = cv2.imread('geezers.jpg', 1)
 
 hue, sat, val = img1[:,:,0], img1[:,:,1], img1[:,:,2]
 a = np.mean(img1[:,:,2])
@@ -13,7 +13,7 @@ while (True):
     # Capture the video frame
     # by frame
     ret, frame = vid.read()
-    image = frame
+    image = img1
     # cv2.imshow('original',image)
     blur = cv2.GaussianBlur(image, (5, 5), 0)
     # cv2.imshow('blur',blur)
@@ -116,9 +116,20 @@ while (True):
     lab = cv2.cvtColor(adjusted, cv2.COLOR_BGR2LAB)
     l, a, b = cv2.split(lab)
     mask2 = cv2.inRange(l, 220, 255)
-    cv2.imshow('f', adjusted)
-    cv2.imshow('fEE', mask2)
-    cv2.imshow('fEeeE', edges)
+    ret,thresh_L = cv2.threshold(l,70,200,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+    contours, hierarchy = cv2.findContours(mask2,
+                                           cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+    cv2.imshow('Canny Edges After Contouring', mask2)
+    cv2.waitKey(0)
+
+    print("Number of Contours found = " + str(len(contours)))
+
+    # Draw all contours
+    # -1 signifies drawing all contours
+    cv2.drawContours(cropped_image, contours, -1, (0, 255, 0), 3)
+
+    cv2.imshow('fEeeE', cropped_image)
 
     cv2.waitKey(0)
     # the 'q' button is set as the
